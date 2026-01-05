@@ -1,10 +1,13 @@
 package com.mts.socialvibe_app.user.model;
 
+import com.mts.socialvibe_app.features.comments.model.Comment;
+import com.mts.socialvibe_app.features.likes.model.Like;
 import com.mts.socialvibe_app.features.posts.model.Post;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -32,7 +35,15 @@ public class UserEntity {
     @Column(length = 500)
     private String bio;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Post> posts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Post> posts;
+    @ToString.Exclude
+    private List<Like> likes;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Comment> comments;
 }
