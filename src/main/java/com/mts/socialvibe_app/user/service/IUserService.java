@@ -1,9 +1,10 @@
 package com.mts.socialvibe_app.user.service;
 
-import com.mts.socialvibe_app.user.dto.UserDto;
+import com.mts.socialvibe_app.user.dto.UserRequest;
+import com.mts.socialvibe_app.user.dto.UserResponse;
 
 public interface IUserService {
-    UserDto register(UserDto userDto);
+    UserResponse register(UserRequest userRequest);
 
-    String verify(UserDto userDto);
+    String verify(UserRequest userRequest);
 }

@@ -1,9 +1,11 @@
 package com.mts.socialvibe_app.user.service;
 
 import com.mts.socialvibe_app.filters.jwt.JwtService;
-import com.mts.socialvibe_app.user.dto.UserDto;
+import com.mts.socialvibe_app.user.dto.UserRequest;
+import com.mts.socialvibe_app.user.dto.UserResponse;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
@@ -18,59 +21,29 @@ public class UserService implements IUserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, JwtService jwtService,
-                       AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    private UserEntity mapToEntity(UserDto dto) {
-        UserEntity user = new UserEntity();
-        user.setUsername(dto.getUsername());
-        user.setFullName(dto.getFullName());
-        user.setEmail(dto.getEmail());
-        user.setAvatarUrl(dto.getAvatarUrl());
-        user.setBio(dto.getBio());
-        return user;
-    }
-
-    private UserDto mapToDto(UserEntity user) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setFullName(user.getFullName());
-        dto.setPassword(null);
-        dto.setEmail(user.getEmail());
-        dto.setAvatarUrl(user.getAvatarUrl());
-        dto.setBio(user.getBio());
-        return dto;
-    }
-
     @Override
-    public UserDto register(UserDto userDto) {
-        if (userRepository.existsByUsername(userDto.getUsername())) {
-            throw new RuntimeException("Username '" + userDto.getUsername() + "' is already taken.");
+    public UserResponse register(UserRequest userRequest) {
+        if (userRepository.existsByUsername(userRequest.getUsername())) {
+            throw new RuntimeException("Username '" + userRequest.getUsername() + "' is already taken.");
         }
-        if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new RuntimeException("Email '" + userDto.getEmail() + "' is already registered.");
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new RuntimeException("Email '" + userRequest.getEmail() + "' is already registered.");
         }
 
-        UserEntity user = mapToEntity(userDto);
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        UserEntity user = UserEntity.mapToEntity(userRequest);
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
         UserEntity savedUser = userRepository.save(user);
-        return mapToDto(savedUser);
+        return UserResponse.mapToDto(savedUser);
     }
 
     @Override
-    public String verify(UserDto userDto) {
+    public String verify(UserRequest userRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
+                new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
 
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(userDto.getUsername());
+            return jwtService.generateToken(userRequest.getUsername());
         }
 
         return "Fail";

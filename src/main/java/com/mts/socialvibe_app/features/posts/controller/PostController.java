@@ -1,7 +1,12 @@
 package com.mts.socialvibe_app.features.posts.controller;
 
-import com.mts.socialvibe_app.features.posts.dto.PostDto;
+import com.mts.socialvibe_app.common.BaseController;
+import com.mts.socialvibe_app.common.MessageCode;
+import com.mts.socialvibe_app.common.ResponseWrapper;
+import com.mts.socialvibe_app.features.posts.dto.PostRequest;
+import com.mts.socialvibe_app.features.posts.dto.PostResponse;
 import com.mts.socialvibe_app.features.posts.service.IPostService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/posts")
-public class PostController {
+public class PostController extends BaseController {
 
     private final IPostService service;
 
@@ -21,37 +26,44 @@ public class PostController {
     }
 
     @PostMapping("/create-post")
-    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseWrapper createPost(@Valid @RequestBody PostRequest postRequest, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        return new ResponseEntity<>(service.createPost(postDto,username), HttpStatus.CREATED);
+        return createResponse(MessageCode.POST_CREATE_SUCCESS, service.createPost(postRequest,username));
     }
 
     @GetMapping("/get-all-posts")
-    public ResponseEntity<List<PostDto>> getAllPosts() {
-        return new ResponseEntity<>(service.getAllPosts(), HttpStatus.OK);
+    public ResponseWrapper getAllPosts(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS, service.getAllPosts(username));
     }
 
     @GetMapping("/get-my-posts")
-    public ResponseEntity<List<PostDto>> getMyPosts(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseWrapper getMyPosts(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        return new ResponseEntity<>(service.getMyPosts(username), HttpStatus.OK);
+        return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS, service.getMyPosts(username));
     }
 
     @PutMapping("/edit-post/{id}")
-    public ResponseEntity<PostDto> editPost(
+    public ResponseWrapper editPost(
             @PathVariable Long id,
-            @RequestBody PostDto postDto,
+            @RequestBody PostRequest postRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        return new ResponseEntity<>(service.editPost(id, username, postDto), HttpStatus.OK);
+        return createResponse(MessageCode.POST_UPDATE_SUCCESS, service.editPost(id, username, postRequest));
     }
 
     @DeleteMapping("/delete-post/{id}")
-    public ResponseEntity<String> deletePost(
+    public ResponseWrapper deletePost(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         service.deletePost(id, userDetails.getUsername());
-        return new ResponseEntity<>("Post deleted successfully!", HttpStatus.OK);
+        return createResponse(MessageCode.POST_DELETE_SUCCESS, "Post Deleted");
+    }
+
+    @GetMapping("/new-feed")
+    public ResponseEntity<List<PostResponse>> getFeed(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        return new ResponseEntity<>(service.getFeed(username), HttpStatus.OK);
     }
 }

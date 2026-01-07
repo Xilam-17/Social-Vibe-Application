@@ -1,14 +1,14 @@
 package com.mts.socialvibe_app.features.comments.service;
 
-import com.mts.socialvibe_app.features.comments.dto.CommentDto;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.mts.socialvibe_app.features.comments.dto.CommentRequest;
+import com.mts.socialvibe_app.features.comments.dto.CommentResponse;
 
 import java.util.List;
 
 public interface ICommentService {
-    CommentDto createComment(Long postId, String username, CommentDto commentDto);
+    CommentResponse createComment(Long postId, String username, CommentRequest commentRequest);
 
-    List<CommentDto> getAllCommentsByPostId(Long postId);
+    List<CommentResponse> getAllCommentsByPostId(Long postId);
 
-    void deleteComment(Long postId, Long commentId, UserDetails userDetails);
+    void deleteComment(Long postId, Long commentId, String username);
 }

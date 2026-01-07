@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class LikeDto {
-    private Long likeCount;
+    private Long countLike;
     private boolean isLiked;
     private String message;
 }

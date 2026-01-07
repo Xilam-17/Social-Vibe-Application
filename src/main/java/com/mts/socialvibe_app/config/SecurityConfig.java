@@ -1,6 +1,7 @@
 package com.mts.socialvibe_app.config;
 
 import com.mts.socialvibe_app.filters.jwt.JwtFilter;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,16 +32,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers("/api/v1/user/register", "/api/v1/user/login").permitAll()
-                                .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+
+            return http
+                    .csrf(csrf -> csrf.disable())
+                    .authorizeHttpRequests(request ->
+                            request.requestMatchers("/api/v1/user/register", "/api/v1/user/login").permitAll()
+                                    .anyRequest().authenticated())
+                    .httpBasic(Customizer.withDefaults())
+                    .sessionManagement(session ->
+                            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                    .build();
     }
 
     @Bean

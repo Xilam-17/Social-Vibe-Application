@@ -1,18 +1,20 @@
 package com.mts.socialvibe_app.features.posts.service;
 
-import com.mts.socialvibe_app.features.posts.dto.PostDto;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.mts.socialvibe_app.features.posts.dto.PostRequest;
+import com.mts.socialvibe_app.features.posts.dto.PostResponse;
 
 import java.util.List;
 
 public interface IPostService {
-    PostDto createPost(PostDto postDto, String username);
+    PostResponse createPost(PostRequest postRequest, String username);
 
-    List<PostDto> getAllPosts();
+    List<PostResponse> getAllPosts(String username);
 
-    List<PostDto> getMyPosts(String username);
+    List<PostResponse> getMyPosts(String username);
 
-    PostDto editPost(Long id, String username, PostDto postDto);
+    PostResponse editPost(Long id, String username, PostRequest postRequest);
 
     void deletePost(Long id, String username);
+
+    List<PostResponse> getFeed(String username);
 }

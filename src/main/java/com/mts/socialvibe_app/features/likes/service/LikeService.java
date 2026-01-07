@@ -29,19 +29,23 @@ public class LikeService implements ILikeService{
 
         UserEntity user = userRepository.findByUsername(username);
 
-        Optional<Like> existingLike = likeRepository.findByUserAndPost(user, post);
+        if(user == null) throw new RuntimeException("User not found");
+
+        Optional<Like> existingLike = likeRepository.findByUserUsernameAndPost(user.getUsername(), post);
         boolean isLiked;
         String message;
 
         if(existingLike.isPresent()) {
             likeRepository.delete(existingLike.get());
+            likeRepository.flush();
             isLiked = false;
             message = "Post unliked";
         } else {
             Like like = new Like();
             like.setUser(user);
             like.setPost(post);
-            Like savedLike = likeRepository.save(like);
+            likeRepository.save(like);
+            likeRepository.flush();
             isLiked = true;
             message = "Post liked";
         }

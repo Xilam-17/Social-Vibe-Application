@@ -2,6 +2,8 @@ package com.mts.socialvibe_app.features.posts.model;
 
 import com.mts.socialvibe_app.features.comments.model.Comment;
 import com.mts.socialvibe_app.features.likes.model.Like;
+import com.mts.socialvibe_app.features.posts.dto.PostRequest;
+import com.mts.socialvibe_app.features.posts.dto.PostResponse;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,4 +47,12 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Comment> comments;
+
+    public static Post mapToEntity(PostRequest dto) {
+        Post post = new Post();
+        post.setCaption(dto.getCaption());
+        post.setImageUrl(dto.getImgUrl());
+        post.setLocation(dto.getLocation());
+        return post;
+    }
 }

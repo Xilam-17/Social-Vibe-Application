@@ -1,13 +1,13 @@
 package com.mts.socialvibe_app.features.comments.service;
 
-import com.mts.socialvibe_app.features.comments.dto.CommentDto;
+import com.mts.socialvibe_app.features.comments.dto.CommentRequest;
+import com.mts.socialvibe_app.features.comments.dto.CommentResponse;
 import com.mts.socialvibe_app.features.comments.model.Comment;
 import com.mts.socialvibe_app.features.comments.repository.CommentRepository;
 import com.mts.socialvibe_app.features.posts.model.Post;
 import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,25 +25,6 @@ public class CommentService implements ICommentService{
         this.userRepository = userRepository;
     }
 
-    private Comment mapToEntity(CommentDto dto) {
-        Comment comment = new Comment();
-        comment.setContent(dto.getContent());
-        return comment;
-    }
-
-    private CommentDto mapToDto(Comment comment) {
-        CommentDto dto = new CommentDto();
-        dto.setId(comment.getId());
-        dto.setContent(comment.getContent());
-        dto.setCreatedAt(comment.getCreatedAt());
-
-        if (comment.getUser() != null) {
-            dto.setUsername(comment.getUser().getUsername());
-            dto.setUserAvatar(comment.getUser().getAvatarUrl());
-        }
-        return dto;
-    }
-
     private Post getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("Post not found"));
@@ -51,41 +32,51 @@ public class CommentService implements ICommentService{
     }
 
     @Override
-    public CommentDto createComment(Long postId, String username, CommentDto commentDto) {
+    public CommentResponse createComment(Long postId, String username, CommentRequest commentRequest) {
         Post post = getPost(postId);
 
         UserEntity user = userRepository.findByUsername(username);
+        if(user == null) {
+            throw  new RuntimeException("User not found!");
+        }
 
-        Comment comment = mapToEntity(commentDto);
+        Comment comment = Comment.mapToEntity(commentRequest);
         comment.setPost(post);
         comment.setUser(user);
 
         Comment savedComment = commentRepository.save(comment);
-        return mapToDto(savedComment);
+        return CommentResponse.mapToDto(savedComment);
     }
 
     @Override
-    public List<CommentDto> getAllCommentsByPostId(Long postId) {
+    public List<CommentResponse> getAllCommentsByPostId(Long postId) {
         Post post = getPost(postId);
         List<Comment> comments = commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId);
-        return comments.stream().map(this::mapToDto).toList();
+        return comments.stream().map(CommentResponse::mapToDto).toList();
     }
 
     @Override
-    public void deleteComment(Long postId, Long commentId, UserDetails userDetails) {
+    public void deleteComment(Long postId, Long commentId, String username) {
         Post post = getPost(postId);
 
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(()-> new RuntimeException("Comment not found!"));
+                .orElseThrow(() -> new RuntimeException("Comment not found!"));
 
-        if(!comment.getPost().getId().equals(post.getId())) {
+        if (!comment.getPost().getId().equals(post.getId())) {
             throw new RuntimeException("Comment doesn't belong to this post");
         }
 
-        String currentUsername = userDetails.getUsername();
-        if(!comment.getUser().getUsername().equals(currentUsername)) {
-            throw new RuntimeException("You are not authorized to delete this comment");
+        String commentAuthor = comment.getUser().getUsername();
+        String postOwner = post.getUser().getUsername();
+
+        boolean isCommentAuthor = commentAuthor.equals(username);
+        boolean isPostOwner = postOwner.equals(username);
+
+        if (!isCommentAuthor && !isPostOwner) {
+            throw new RuntimeException("You are not authorized to delete this comment. " +
+                    "Only the comment author or post owner can perform this action.");
         }
+
         commentRepository.delete(comment);
     }
 

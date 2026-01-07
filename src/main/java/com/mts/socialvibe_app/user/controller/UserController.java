@@ -1,7 +1,9 @@
 package com.mts.socialvibe_app.user.controller;
 
-import com.mts.socialvibe_app.filters.jwt.JwtService;
-import com.mts.socialvibe_app.user.dto.UserDto;
+import com.mts.socialvibe_app.common.BaseController;
+import com.mts.socialvibe_app.common.MessageCode;
+import com.mts.socialvibe_app.common.ResponseWrapper;
+import com.mts.socialvibe_app.user.dto.UserRequest;
 import com.mts.socialvibe_app.user.service.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/user")
-public class UserController {
+public class UserController extends BaseController {
 
     private final IUserService service;
 
@@ -22,17 +24,17 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody UserDto userDto) {
-        return new ResponseEntity<>(service.register(userDto), HttpStatus.CREATED);
+    public ResponseWrapper register(@Valid @RequestBody UserRequest userRequest) {
+        return createResponse(MessageCode.USER_REGISTER_SUCCESS, service.register(userRequest));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDto userDto) {
-        String token = service.verify(userDto);
-        if(token.equals("Fail")) {
-            return new ResponseEntity<>("Invalid Credentials!", HttpStatus.UNAUTHORIZED);
+    public ResponseWrapper login(@RequestBody UserRequest userRequest) {
+        try {
+            String token = service.verify(userRequest);
+            return createResponse(MessageCode.USER_LOGIN_SUCCESS, token);
+        } catch (Exception e) {
+            return createResponse(MessageCode.UNAUTHORIZED_INVALID_CREDENTIALS, "Invalid username or password");
         }
-        return new ResponseEntity<>(token,HttpStatus.OK);
-
     }
 }

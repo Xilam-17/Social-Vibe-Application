@@ -1,18 +1,18 @@
 package com.mts.socialvibe_app.features.comments.controller;
 
-import com.mts.socialvibe_app.features.comments.dto.CommentDto;
+import com.mts.socialvibe_app.common.BaseController;
+import com.mts.socialvibe_app.common.MessageCode;
+import com.mts.socialvibe_app.common.ResponseWrapper;
+import com.mts.socialvibe_app.features.comments.dto.CommentRequest;
 import com.mts.socialvibe_app.features.comments.service.ICommentService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/posts")
-public class CommentController {
+public class CommentController extends BaseController {
 
     private final ICommentService service;
 
@@ -21,22 +21,23 @@ public class CommentController {
     }
 
     @PostMapping("/{postId}/comment")
-    public ResponseEntity<CommentDto> createComment(
+    public ResponseWrapper createComment(
             @PathVariable Long postId,
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody CommentDto commentDto) {
+            @Valid @RequestBody CommentRequest commentRequest) {
         String username = userDetails.getUsername();
-        return new ResponseEntity<>(service.createComment(postId, username, commentDto), HttpStatus.CREATED);
+        return createResponse(MessageCode.COMMENT_CREATE_SUCCESS, service.createComment(postId, username, commentRequest));
     }
 
     @GetMapping("/{postId}/comments")
-    public ResponseEntity<List<CommentDto>> getAllComments(@PathVariable Long postId) {
-        return new ResponseEntity<>(service.getAllCommentsByPostId(postId), HttpStatus.OK);
+    public ResponseWrapper getAllComments(@PathVariable Long postId) {
+        return  createResponse(MessageCode.COMMENT_RETRIEVE_SUCCESS, service.getAllCommentsByPostId(postId));
     }
 
     @DeleteMapping("/{postId}/comment/{commentId}/delete-comment")
-    public ResponseEntity<String> deleteComment(@PathVariable Long postId,@PathVariable Long commentId, @AuthenticationPrincipal UserDetails userDetails) {
-        service.deleteComment(postId, commentId, userDetails);
-        return new ResponseEntity<>("Comment deleted successfully!", HttpStatus.OK);
+    public ResponseWrapper deleteComment(@PathVariable Long postId, @PathVariable Long commentId, @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        service.deleteComment(postId, commentId, username);
+        return createResponse(MessageCode.COMMENT_DELETE_SUCCESS, "Comment Deleted");
     }
 }

@@ -1,5 +1,6 @@
 package com.mts.socialvibe_app.features.comments.model;
 
+import com.mts.socialvibe_app.features.comments.dto.CommentRequest;
 import com.mts.socialvibe_app.features.posts.model.Post;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import jakarta.persistence.*;
@@ -36,4 +37,10 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
+
+    public static Comment mapToEntity(CommentRequest dto) {
+        Comment comment = new Comment();
+        comment.setContent(dto.getContent());
+        return comment;
+    }
 }

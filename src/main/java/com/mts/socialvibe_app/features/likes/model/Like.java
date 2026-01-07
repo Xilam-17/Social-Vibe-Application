@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "like_tbl")
+@Table(name = "like_tbl", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "post_id"})
+})
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
