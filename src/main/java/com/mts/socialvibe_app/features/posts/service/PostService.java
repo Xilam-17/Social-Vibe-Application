@@ -17,65 +17,65 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class PostService implements IPostService{
+public class PostService implements IPostService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
 
-
     private Post getPost(Long id) {
-        Post post = postRepository.findById(id)
+        return postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found!"));
-        return post;
     }
 
     @Override
     public PostResponse createPost(PostRequest postRequest, String username) {
         UserEntity user = userRepository.findByUsername(username);
-        if(user == null) {
-            throw new RuntimeException("User not found ");
+        if (user == null) {
+            throw new RuntimeException("User not found");
         }
         Post post = Post.mapToEntity(postRequest);
         post.setUser(user);
         Post savedPost = postRepository.save(post);
-        return PostResponse.mapToDto(savedPost);
+        return mapToPostResponse(savedPost, username);
     }
 
     @Override
     public List<PostResponse> getAllPosts(String username) {
-        UserEntity user = userRepository.findByUsername(username);
         List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
-        return posts.stream().map(PostResponse::mapToDto).toList();
+        return posts.stream().map(post -> this.mapToPostResponse(post, username)).toList();
     }
-
 
     @Override
     public List<PostResponse> getMyPosts(String username) {
-        List<Post> posts = postRepository.findByUserUsernameOrderByCreatedAtDesc(username);
-        return posts.stream().map(PostResponse::mapToDto).toList();
+        List<Post> posts = postRepository.findByUserUsernameIgnoreCaseOrderByCreatedAtDesc(username);
+        return posts.stream().map(post -> this.mapToPostResponse(post, username)).toList();
     }
 
     @Override
     public PostResponse editPost(Long id, String username, PostRequest postRequest) {
         Post post = getPost(id);
 
-        if(!post.getUser().getUsername().equals(username)){
+        if (!post.getUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to edit this post!");
         }
 
         post.setCaption(postRequest.getCaption());
         post.setLocation(postRequest.getLocation());
-        Post updatedPost = postRepository.save(post);
 
-        return PostResponse.mapToDto(updatedPost);
+        if (postRequest.getImageUrl() != null) {
+            post.setImageUrl(postRequest.getImageUrl());
+        }
+
+        Post updatedPost = postRepository.save(post);
+        return this.mapToPostResponse(updatedPost, username);
     }
 
     @Override
     public void deletePost(Long id, String username) {
         Post post = getPost(id);
-        if(!post.getUser().getUsername().equals(username)) {
+        if (!post.getUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
         postRepository.delete(post);
@@ -83,8 +83,24 @@ public class PostService implements IPostService{
 
     @Override
     public List<PostResponse> getFeed(String username) {
-        return List.of();
+        List<Post> posts = postRepository.findFeedByUsername(username);
+        return posts.stream()
+                .map(post -> this.mapToPostResponse(post, username))
+                .toList();
+    }
+
+    @Override
+    public List<PostResponse> getPostsByUsername(String targetUsername, String currentUsername) {
+        List<Post> posts = postRepository.findByUserUsernameIgnoreCaseOrderByCreatedAtDesc(targetUsername);
+        return posts.stream().map(post -> this.mapToPostResponse(post, currentUsername)).toList();
     }
 
 
+    public PostResponse mapToPostResponse(Post post, String username) {
+        boolean isLiked = likeRepository.findByUserUsernameAndPostId(username, post.getId()).isPresent();
+        long likeCount = likeRepository.countByPostId(post.getId());
+        long commentCount = commentRepository.countByPostId(post.getId());
+
+        return PostResponse.mapToDto(post, isLiked, likeCount, commentCount);
+    }
 }

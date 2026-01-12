@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 public class PostRequest {
     @NotBlank(message = "Caption cannot be empty")
     private String caption;
-    private String imgUrl;
+    private String imageUrl;
     private String location;
 }

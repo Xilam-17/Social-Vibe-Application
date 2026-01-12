@@ -62,7 +62,7 @@ public class CommentService implements ICommentService{
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found!"));
 
-        if (!comment.getPost().getId().equals(post.getId())) {
+        if (!comment.getPost().getId().equals(postId)){
             throw new RuntimeException("Comment doesn't belong to this post");
         }
 
@@ -79,8 +79,5 @@ public class CommentService implements ICommentService{
 
         commentRepository.delete(comment);
     }
-
-
-
 
 }

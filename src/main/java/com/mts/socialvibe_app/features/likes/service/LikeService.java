@@ -31,7 +31,7 @@ public class LikeService implements ILikeService{
 
         if(user == null) throw new RuntimeException("User not found");
 
-        Optional<Like> existingLike = likeRepository.findByUserUsernameAndPost(user.getUsername(), post);
+        Optional<Like> existingLike = likeRepository.findByUserUsernameAndPost(username, post);
         boolean isLiked;
         String message;
 
@@ -49,6 +49,7 @@ public class LikeService implements ILikeService{
             isLiked = true;
             message = "Post liked";
         }
+        likeRepository.flush();
 
         Long countLikes = likeRepository.countByPostId(postId);
         return new LikeDto(countLikes, isLiked, message);

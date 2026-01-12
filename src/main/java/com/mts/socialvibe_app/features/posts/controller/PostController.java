@@ -4,16 +4,11 @@ import com.mts.socialvibe_app.common.BaseController;
 import com.mts.socialvibe_app.common.MessageCode;
 import com.mts.socialvibe_app.common.ResponseWrapper;
 import com.mts.socialvibe_app.features.posts.dto.PostRequest;
-import com.mts.socialvibe_app.features.posts.dto.PostResponse;
 import com.mts.socialvibe_app.features.posts.service.IPostService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -62,8 +57,8 @@ public class PostController extends BaseController {
     }
 
     @GetMapping("/new-feed")
-    public ResponseEntity<List<PostResponse>> getFeed(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseWrapper getFeed(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        return new ResponseEntity<>(service.getFeed(username), HttpStatus.OK);
+        return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS, service.getFeed(username));
     }
 }

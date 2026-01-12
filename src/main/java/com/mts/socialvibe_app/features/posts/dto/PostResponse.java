@@ -26,7 +26,7 @@ public class PostResponse {
     private Long commentCount;
     private boolean isLikedByCurrentUser;
 
-    public static PostResponse mapToDto(Post post) {
+    public static PostResponse mapToDto(Post post, boolean isLiked, long likeCount, long commentCount) {
         return PostResponse.builder()
                 .id(post.getId())
                 .caption(post.getCaption())
@@ -35,8 +35,9 @@ public class PostResponse {
                 .createdAt(post.getCreatedAt())
                 .username(post.getUser() != null ? post.getUser().getUsername() : null)
                 .userAvatar(post.getUser() != null ? post.getUser().getAvatarUrl() : null)
-                .likeCount(post.getLikes() != null ? (long) post.getLikes().size() : 0L)
-                .commentCount(post.getComments() != null ? (long) post.getComments().size() : 0L)
+                .isLikedByCurrentUser(isLiked)
+                .likeCount(likeCount)
+                .commentCount(commentCount)
                 .build();
     }
 

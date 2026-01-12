@@ -1,6 +1,7 @@
 package com.mts.socialvibe_app.user.service;
 
 import com.mts.socialvibe_app.user.model.UserEntity;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,7 +19,7 @@ public class UserPrincipal implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("USER"));
     }
 
@@ -27,8 +28,12 @@ public class UserPrincipal implements UserDetails {
         return user.getPassword();
     }
 
+    public Long getId() {
+        return user.getId();
+    }
+
     @Override
-    public String getUsername() {
+    public @NonNull String getUsername() {
         return user.getUsername();
     }
 

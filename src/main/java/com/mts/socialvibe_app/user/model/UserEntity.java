@@ -1,6 +1,7 @@
 package com.mts.socialvibe_app.user.model;
 
 import com.mts.socialvibe_app.features.comments.model.Comment;
+import com.mts.socialvibe_app.features.relationship.model.Relationship;
 import com.mts.socialvibe_app.features.likes.model.Like;
 import com.mts.socialvibe_app.features.posts.model.Post;
 import com.mts.socialvibe_app.user.dto.UserRequest;
@@ -16,6 +17,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "users", indexes = {
+        @Index(name = "idx_username", columnList = "username"),
+        @Index(name = "idx_fullName", columnList = "fullName")
+})
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,6 +52,14 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Relationship> followers;
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Relationship> followings;
 
     public static UserEntity mapToEntity(UserRequest dto) {
         UserEntity user = new UserEntity();

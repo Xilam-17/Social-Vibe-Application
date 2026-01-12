@@ -51,7 +51,7 @@ public class Post {
     public static Post mapToEntity(PostRequest dto) {
         Post post = new Post();
         post.setCaption(dto.getCaption());
-        post.setImageUrl(dto.getImgUrl());
+        post.setImageUrl(dto.getImageUrl());
         post.setLocation(dto.getLocation());
         return post;
     }

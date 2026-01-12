@@ -5,13 +5,11 @@ import com.mts.socialvibe_app.common.MessageCode;
 import com.mts.socialvibe_app.common.ResponseWrapper;
 import com.mts.socialvibe_app.user.dto.UserRequest;
 import com.mts.socialvibe_app.user.service.IUserService;
+import com.mts.socialvibe_app.user.service.UserPrincipal;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -36,5 +34,30 @@ public class UserController extends BaseController {
         } catch (Exception e) {
             return createResponse(MessageCode.UNAUTHORIZED_INVALID_CREDENTIALS, "Invalid username or password");
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseWrapper searchUser(@RequestParam String targetUsername, @AuthenticationPrincipal UserDetails userDetails) {
+        String currentUsername = userDetails.getUsername();
+        return createResponse(MessageCode.USER_FOUND_SUCCESS, service.searchUser(targetUsername, currentUsername));
+    }
+
+
+    @GetMapping("/profile/{targetUsername}")
+    public ResponseWrapper getUserProfile(@PathVariable String targetUsername, @AuthenticationPrincipal UserDetails userDetails) {
+        String currentUsername = userDetails.getUsername();
+        return createResponse(MessageCode.USER_FOUND_SUCCESS, service.getUserProfile(targetUsername, currentUsername));
+    }
+
+    @GetMapping("/followings")
+    public ResponseWrapper followingsUsers(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = userPrincipal.getId();
+        return createResponse(MessageCode.USER_FOUND_SUCCESS, service.followingsUsers(userId));
+    }
+
+    @GetMapping("/followers")
+    public ResponseWrapper followersUsers(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = userPrincipal.getId();
+        return createResponse(MessageCode.USER_FOUND_SUCCESS, service.followersUsers(userId));
     }
 }

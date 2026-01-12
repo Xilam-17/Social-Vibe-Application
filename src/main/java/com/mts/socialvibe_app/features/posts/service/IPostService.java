@@ -17,4 +17,6 @@ public interface IPostService {
     void deletePost(Long id, String username);
 
     List<PostResponse> getFeed(String username);
+
+    List<PostResponse> getPostsByUsername(String targetUsername, String currentUsername);
 }
