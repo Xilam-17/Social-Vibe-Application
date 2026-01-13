@@ -11,14 +11,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RelationshipDto {
     private boolean isFollowing;
+    private boolean isFriend;
     private String message;
-
     private Long followersCount;
     private Long followingsCount;
 
-    public static RelationshipDto from(boolean isFollowing, String message, Long followersCount, Long followingsCount) {
+    public static RelationshipDto from(boolean isFollowing,boolean isFriend, String message, Long followersCount, Long followingsCount) {
         return RelationshipDto.builder()
                 .isFollowing(isFollowing)
+                .isFriend(isFriend)
                 .message(message)
                 .followersCount(followersCount)
                 .followingsCount(followingsCount)

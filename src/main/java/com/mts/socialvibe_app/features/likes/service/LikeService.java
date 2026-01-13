@@ -3,6 +3,8 @@ package com.mts.socialvibe_app.features.likes.service;
 import com.mts.socialvibe_app.features.likes.dto.LikeDto;
 import com.mts.socialvibe_app.features.likes.model.Like;
 import com.mts.socialvibe_app.features.likes.repository.LikeRepository;
+import com.mts.socialvibe_app.features.notifications.model.NotificationType;
+import com.mts.socialvibe_app.features.notifications.service.NotificationService;
 import com.mts.socialvibe_app.features.posts.model.Post;
 import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.user.model.UserEntity;
@@ -20,6 +22,7 @@ public class LikeService implements ILikeService{
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -49,6 +52,8 @@ public class LikeService implements ILikeService{
             isLiked = true;
             message = "Post liked";
         }
+        notificationService.createNotification(post.getUser(), user, NotificationType.LIKE, post.getId());
+
         likeRepository.flush();
 
         Long countLikes = likeRepository.countByPostId(postId);

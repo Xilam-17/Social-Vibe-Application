@@ -19,4 +19,6 @@ public interface RelationshipRepository extends JpaRepository<Relationship, Long
     @Query("select count(r) from Relationship r where r.following.id = :id")
     Long countFollowerByFollowingId(@Param("id") Long id);
 
-}
+    @Query("select count(r) > 0 from Relationship r " +
+            "where r.follower.id = :targetId and r.following.id = :currentUserId")
+    boolean isFollowingBack(@Param("currentUserId") Long currentUserId, @Param("targetId") Long targetId);}

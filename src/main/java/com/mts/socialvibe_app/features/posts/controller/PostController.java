@@ -6,9 +6,13 @@ import com.mts.socialvibe_app.common.ResponseWrapper;
 import com.mts.socialvibe_app.features.posts.dto.PostRequest;
 import com.mts.socialvibe_app.features.posts.service.IPostService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -20,10 +24,15 @@ public class PostController extends BaseController {
         this.service = service;
     }
 
-    @PostMapping("/create-post")
-    public ResponseWrapper createPost(@Valid @RequestBody PostRequest postRequest, @AuthenticationPrincipal UserDetails userDetails) {
+    @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseWrapper createPost(
+            @RequestPart("postData") @Valid PostRequest postRequest,
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+
         String username = userDetails.getUsername();
-        return createResponse(MessageCode.POST_CREATE_SUCCESS, service.createPost(postRequest,username));
+
+        return createResponse(MessageCode.POST_CREATE_SUCCESS, service.createPost(postRequest, file, username));
     }
 
     @GetMapping("/get-all-posts")
@@ -38,13 +47,14 @@ public class PostController extends BaseController {
         return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS, service.getMyPosts(username));
     }
 
-    @PutMapping("/edit-post/{id}")
+    @PutMapping(value = "/edit-post/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseWrapper editPost(
             @PathVariable Long id,
-            @RequestBody PostRequest postRequest,
+            @RequestPart("postData") PostRequest postRequest,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        return createResponse(MessageCode.POST_UPDATE_SUCCESS, service.editPost(id, username, postRequest));
+        return createResponse(MessageCode.POST_UPDATE_SUCCESS, service.editPost(id, username, postRequest, file));
     }
 
     @DeleteMapping("/delete-post/{id}")

@@ -1,6 +1,7 @@
 package com.mts.socialvibe_app.user.model;
 
 import com.mts.socialvibe_app.features.comments.model.Comment;
+import com.mts.socialvibe_app.features.notifications.model.Notification;
 import com.mts.socialvibe_app.features.relationship.model.Relationship;
 import com.mts.socialvibe_app.features.likes.model.Like;
 import com.mts.socialvibe_app.features.posts.model.Post;
@@ -36,6 +37,7 @@ public class UserEntity {
 
     @Column(unique = true)
     private String email;
+
     private String avatarUrl;
 
     @Column(length = 500)
@@ -60,6 +62,12 @@ public class UserEntity {
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Relationship> followings;
+
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> recipients;
+
+    @OneToMany(mappedBy = "actor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> actors;
 
     public static UserEntity mapToEntity(UserRequest dto) {
         UserEntity user = new UserEntity();

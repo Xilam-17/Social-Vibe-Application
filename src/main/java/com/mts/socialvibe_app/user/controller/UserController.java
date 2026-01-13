@@ -36,7 +36,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @GetMapping("/search")
+    @GetMapping("/search-user")
     public ResponseWrapper searchUser(@RequestParam String targetUsername, @AuthenticationPrincipal UserDetails userDetails) {
         String currentUsername = userDetails.getUsername();
         return createResponse(MessageCode.USER_FOUND_SUCCESS, service.searchUser(targetUsername, currentUsername));

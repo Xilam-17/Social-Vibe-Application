@@ -1,5 +1,7 @@
 package com.mts.socialvibe_app.features.relationship.service;
 
+import com.mts.socialvibe_app.features.notifications.model.NotificationType;
+import com.mts.socialvibe_app.features.notifications.service.NotificationService;
 import com.mts.socialvibe_app.features.relationship.dto.RelationshipDto;
 import com.mts.socialvibe_app.features.relationship.model.Relationship;
 import com.mts.socialvibe_app.features.relationship.repository.RelationshipRepository;
@@ -20,42 +22,47 @@ public class RelationshipService implements IRelationshipService {
 
     private final UserRepository userRepository;
     private final RelationshipRepository relationshipRepository;
+    private final NotificationService notificationService;
 
     @Override
     public RelationshipDto toggleFollow(String followerUsername, Long targetUserId) {
 
         UserEntity follower = userRepository.findByUsername(followerUsername);
         UserEntity following = userRepository.findById(targetUserId)
-                .orElseThrow(()-> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if(follower.getId().equals(targetUserId)) {
+        if (follower.getId().equals(targetUserId)) {
             throw new RuntimeException("You can't follow yourself!");
         }
 
         Optional<Relationship> existingFollow = relationshipRepository.findByFollowerUsernameAndFollowingId(follower.getUsername(), following.getId());
         boolean isFollowing;
-        String message;
+        String initialMessage;
 
-        if(existingFollow.isPresent()) {
+        if (existingFollow.isPresent()) {
             relationshipRepository.delete(existingFollow.get());
-            relationshipRepository.flush();
             isFollowing = false;
-            message = "Unfollowed " + following.getUsername();
+            initialMessage = "Unfollowed " + following.getUsername();
         } else {
             Relationship relationship = new Relationship();
             relationship.setFollower(follower);
             relationship.setFollowing(following);
             relationshipRepository.save(relationship);
-            relationshipRepository.flush();
+            notificationService.createNotification(following, follower, NotificationType.FOLLOW, null);
             isFollowing = true;
-            message = "Followed " + following.getUsername();
+            initialMessage = "Followed " + following.getUsername();
         }
 
         relationshipRepository.flush();
 
-        Long followersCount = relationshipRepository.countFollowingByFollowerId(targetUserId);
-        Long followingsCount = relationshipRepository.countFollowerByFollowingId(targetUserId);
+        boolean targetFollowsMe = relationshipRepository.isFollowingBack(follower.getId(), targetUserId);
+        boolean isFriend = isFollowing && targetFollowsMe;
 
-        return RelationshipDto.from(isFollowing, message, followersCount, followingsCount);
+        Long followersCount = relationshipRepository.countFollowerByFollowingId(targetUserId);
+        Long followingsCount = relationshipRepository.countFollowingByFollowerId(targetUserId);
+
+        String finalMessage = isFriend ? "You are now friends with " + following.getUsername() : initialMessage;
+
+        return RelationshipDto.from(isFollowing, isFriend, finalMessage, followersCount, followingsCount);
     }
 }

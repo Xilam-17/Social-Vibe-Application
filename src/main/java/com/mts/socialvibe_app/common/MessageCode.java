@@ -18,7 +18,10 @@ public enum MessageCode {
     UNAUTHORIZED_INVALID_CREDENTIALS("UIC", "Invalid credentials"),
     FOLLOW_API_SUCCESS("FAS", "Follow api success"),
     USER_FOUND_SUCCESS("UFS", "User found success"),
-    USER_NOT_FOUND("UNF", "User not found");
+    USER_NOT_FOUND("UNF", "User not found"),
+    NOTIFICATION_RETRIEVE_SUCCESS("NRS", "Notification retrieved successfully"),
+    NOTIFICATION_COUNT_SUCCESS("NCS", "Notification count success"),
+    NOTIFICATION_UPDATE_SUCCESS("NUS", "Notification updated successfully");
     private final String statusCode;
     private final String message;
 

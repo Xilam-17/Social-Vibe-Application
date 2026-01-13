@@ -4,26 +4,25 @@ import com.mts.socialvibe_app.features.comments.dto.CommentRequest;
 import com.mts.socialvibe_app.features.comments.dto.CommentResponse;
 import com.mts.socialvibe_app.features.comments.model.Comment;
 import com.mts.socialvibe_app.features.comments.repository.CommentRepository;
+import com.mts.socialvibe_app.features.notifications.model.NotificationType;
+import com.mts.socialvibe_app.features.notifications.service.NotificationService;
 import com.mts.socialvibe_app.features.posts.model.Post;
 import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService implements ICommentService{
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-
-    public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository) {
-        this.commentRepository = commentRepository;
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-    }
+    private final NotificationService notificationService;
 
     private Post getPost(Long id) {
         Post post = postRepository.findById(id)
@@ -45,12 +44,13 @@ public class CommentService implements ICommentService{
         comment.setUser(user);
 
         Comment savedComment = commentRepository.save(comment);
+        notificationService.createNotification(post.getUser(), user, NotificationType.COMMENT, post.getId());
+
         return CommentResponse.mapToDto(savedComment);
     }
 
     @Override
     public List<CommentResponse> getAllCommentsByPostId(Long postId) {
-        Post post = getPost(postId);
         List<Comment> comments = commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId);
         return comments.stream().map(CommentResponse::mapToDto).toList();
     }
