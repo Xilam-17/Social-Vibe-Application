@@ -19,7 +19,7 @@ public class RelationshipController extends BaseController {
 
     private final IRelationshipService service;
 
-    @PostMapping("/{targetUserId}")
+    @PostMapping("/{targetUserId}/follow")
     public ResponseWrapper toggleFollow(
             @PathVariable Long targetUserId,
             @AuthenticationPrincipal UserDetails userDetails

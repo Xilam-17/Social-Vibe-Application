@@ -1,6 +1,8 @@
 package com.mts.socialvibe_app.user.service;
 
+import com.mts.socialvibe_app.common.LocalStorageService;
 import com.mts.socialvibe_app.features.posts.dto.PostResponse;
+import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.features.posts.service.PostService;
 import com.mts.socialvibe_app.features.relationship.repository.RelationshipRepository;
 import com.mts.socialvibe_app.filters.jwt.JwtService;
@@ -10,13 +12,16 @@ import com.mts.socialvibe_app.user.dto.UserResponse;
 import com.mts.socialvibe_app.user.dto.UserSearchResponse;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -29,6 +34,8 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final RelationshipRepository relationshipRepository;
     private final PostService postService;
+    private final PostRepository postRepository;
+    private final LocalStorageService localStorageService;
 
 
     @Override
@@ -90,15 +97,15 @@ public class UserService implements IUserService {
 
     @Override
     public UserProfileResponse getUserProfile(String targetUsername, String currentUsername) {
-
         UserEntity targetUser = userRepository.findByUsername(targetUsername);
         if(targetUser == null) throw new RuntimeException("User not found");
-
-        boolean isFollowing = relationshipRepository.findByFollowerUsernameAndFollowingId(currentUsername, targetUser.getId()).isPresent();
 
         Long followers = relationshipRepository.countFollowerByFollowingId(targetUser.getId());
         Long followings = relationshipRepository.countFollowingByFollowerId(targetUser.getId());
 
+        Long postCount = postRepository.countByUserId(targetUser.getId());
+
+        boolean isFollowing = relationshipRepository.findByFollowerUsernameAndFollowingId(currentUsername, targetUser.getId()).isPresent();
         List<PostResponse> userPosts = postService.getPostsByUsername(targetUsername, currentUsername);
 
         return UserProfileResponse.builder()
@@ -108,7 +115,7 @@ public class UserService implements IUserService {
                 .email(targetUser.getEmail())
                 .avatarUrl(targetUser.getAvatarUrl())
                 .bio(targetUser.getBio())
-                .postCount((long) userPosts.size())
+                .postCount(postCount)
                 .followerCount(followers)
                 .followingCount(followings)
                 .isFollowing(isFollowing)
@@ -116,15 +123,27 @@ public class UserService implements IUserService {
                 .build();
     }
 
+    @Transactional
+    public UserResponse updateAvatar(String username, MultipartFile file) throws IOException {
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) throw new RuntimeException("User not found");
+
+        String imageUri = localStorageService.saveFile(file);
+
+        if (user.getAvatarUrl() != null) {
+            localStorageService.deleteFile(user.getAvatarUrl());
+        }
+
+        user.setAvatarUrl(imageUri);
+        return UserResponse.mapToDto(userRepository.save(user));
+    }
+
     private UserResponse convertToUserResponse(UserEntity user) {
         UserResponse dto = UserResponse.mapToDto(user);
-
-        dto.setPostCount((long) user.getPosts().size());
-
-        dto.setFollowerCount(relationshipRepository.countFollowingByFollowerId(user.getId()));
-
-        dto.setFollowingCount(relationshipRepository.countFollowerByFollowingId(user.getId()));
-        return  dto;
+        dto.setPostCount(postRepository.countByUserId(user.getId()));
+        dto.setFollowerCount(relationshipRepository.countFollowerByFollowingId(user.getId()));
+        dto.setFollowingCount(relationshipRepository.countFollowingByFollowerId(user.getId()));
+        return dto;
     }
 
 

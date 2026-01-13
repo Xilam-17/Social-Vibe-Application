@@ -28,19 +28,17 @@ public class LikeService implements ILikeService{
     @Transactional
     public LikeDto toggleLike(Long postId, String username) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(()-> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
         UserEntity user = userRepository.findByUsername(username);
-
-        if(user == null) throw new RuntimeException("User not found");
+        if (user == null) throw new RuntimeException("User not found");
 
         Optional<Like> existingLike = likeRepository.findByUserUsernameAndPost(username, post);
         boolean isLiked;
         String message;
 
-        if(existingLike.isPresent()) {
+        if (existingLike.isPresent()) {
             likeRepository.delete(existingLike.get());
-            likeRepository.flush();
             isLiked = false;
             message = "Post unliked";
         } else {
@@ -48,11 +46,14 @@ public class LikeService implements ILikeService{
             like.setUser(user);
             like.setPost(post);
             likeRepository.save(like);
-            likeRepository.flush();
+
+            if (!post.getUser().getUsername().equals(username)) {
+                notificationService.createNotification(post.getUser(), user, NotificationType.LIKE, post.getId());
+            }
+
             isLiked = true;
             message = "Post liked";
         }
-        notificationService.createNotification(post.getUser(), user, NotificationType.LIKE, post.getId());
 
         likeRepository.flush();
 

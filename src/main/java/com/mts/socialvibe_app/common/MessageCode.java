@@ -21,7 +21,8 @@ public enum MessageCode {
     USER_NOT_FOUND("UNF", "User not found"),
     NOTIFICATION_RETRIEVE_SUCCESS("NRS", "Notification retrieved successfully"),
     NOTIFICATION_COUNT_SUCCESS("NCS", "Notification count success"),
-    NOTIFICATION_UPDATE_SUCCESS("NUS", "Notification updated successfully");
+    NOTIFICATION_UPDATE_SUCCESS("NUS", "Notification updated successfully"),
+    UPDATE_AVATAR_SUCCESS("UAS", "User Avatar updated successfully");
     private final String statusCode;
     private final String message;
 

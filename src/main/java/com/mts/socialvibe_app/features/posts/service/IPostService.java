@@ -2,6 +2,8 @@ package com.mts.socialvibe_app.features.posts.service;
 
 import com.mts.socialvibe_app.features.posts.dto.PostRequest;
 import com.mts.socialvibe_app.features.posts.dto.PostResponse;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,7 +20,6 @@ public interface IPostService {
 
     void deletePost(Long id, String username);
 
-    List<PostResponse> getFeed(String username);
-
     List<PostResponse> getPostsByUsername(String targetUsername, String currentUsername);
-}
+
+    Page<PostResponse> getFollowingFeed(Long id, String username, int page, int size);}

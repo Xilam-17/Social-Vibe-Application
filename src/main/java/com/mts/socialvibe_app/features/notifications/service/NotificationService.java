@@ -38,7 +38,7 @@ public class NotificationService implements INotificationService{
     @Transactional(readOnly = true)
     public List<NotificationDto> getMyNotifications(String username) {
         UserEntity user = userRepository.findByUsername(username);
-        return notificationRepository.findAllByRecipientIdAndIsReadFalse(user.getId())
+        return notificationRepository.findAllByRecipientUsernameOrderByCreatedAtDesc(user.getUsername())
                 .stream().map(NotificationDto::mapToDto).toList();
     }
 
@@ -46,7 +46,7 @@ public class NotificationService implements INotificationService{
     @Override
     public Long getUnreadCount(String username) {
         UserEntity user = userRepository.findByUsername(username);
-        return notificationRepository.countByRecipientIdAndIsReadFalse(user.getId());
+        return notificationRepository.countByRecipientUsernameAndIsReadFalse(user.getUsername());
     }
 
     @Override
@@ -62,7 +62,7 @@ public class NotificationService implements INotificationService{
     @Transactional
     public void makeAllAsRead(String username) {
         UserEntity user = userRepository.findByUsername(username);
-        List<Notification> unread = notificationRepository.findAllByRecipientIdAndIsReadFalse(user.getId());
+        List<Notification> unread = notificationRepository.findAllByRecipientUsernameAndIsReadFalse(user.getUsername());
         unread.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(unread);
     }

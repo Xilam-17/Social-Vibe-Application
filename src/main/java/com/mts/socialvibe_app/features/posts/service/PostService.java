@@ -12,12 +12,20 @@ import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+// --- FIXED IMPORTS ---
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+// ---------------------
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -37,11 +45,8 @@ public class PostService implements IPostService {
 
     @Override
     public PostResponse createPost(PostRequest postRequest, MultipartFile file, String username) throws IOException {
-
         UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+        if (user == null) throw new RuntimeException("User not found");
 
         String imageURL = localStorageService.saveFile(file);
 
@@ -50,7 +55,6 @@ public class PostService implements IPostService {
         post.setUser(user);
 
         Post savedPost = postRepository.save(post);
-
         notificationService.createNotification(post.getUser(), user, NotificationType.POST, savedPost.getId());
 
         return mapToPostResponse(savedPost, username);
@@ -58,9 +62,7 @@ public class PostService implements IPostService {
 
     @Override
     public PostResponse editPost(Long id, String username, PostRequest postRequest, MultipartFile file) {
-
         Post post = getPost(id);
-
         if(!post.getUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to edit this post");
         }
@@ -87,15 +89,12 @@ public class PostService implements IPostService {
     @Override
     public void deletePost(Long id, String username) {
         Post post = getPost(id);
-
         if (!post.getUser().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
-
         if (post.getImageUrl() != null) {
             localStorageService.deleteFile(post.getImageUrl());
         }
-
         postRepository.delete(post);
     }
 
@@ -111,18 +110,20 @@ public class PostService implements IPostService {
         return posts.stream().map(post -> this.mapToPostResponse(post, username)).toList();
     }
 
-    @Override
-    public List<PostResponse> getFeed(String username) {
-        List<Post> posts = postRepository.findFeedByUsername(username);
-        return posts.stream()
-                .map(post -> this.mapToPostResponse(post, username))
-                .toList();
-    }
 
     @Override
     public List<PostResponse> getPostsByUsername(String targetUsername, String currentUsername) {
         List<Post> posts = postRepository.findByUserUsernameIgnoreCaseOrderByCreatedAtDesc(targetUsername);
         return posts.stream().map(post -> this.mapToPostResponse(post, currentUsername)).toList();
+    }
+
+    @Override
+    public Page<PostResponse> getFollowingFeed(Long userId, String currentUsername, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Post> postPage = postRepository.findFollowingFeed(userId, pageable);
+
+        return postPage.map(post -> mapToPostResponse(post, currentUsername));
     }
 
     public PostResponse mapToPostResponse(Post post, String username) {

@@ -12,11 +12,13 @@ import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService implements ICommentService{
 
     private final CommentRepository commentRepository;
@@ -44,8 +46,10 @@ public class CommentService implements ICommentService{
         comment.setUser(user);
 
         Comment savedComment = commentRepository.save(comment);
-        notificationService.createNotification(post.getUser(), user, NotificationType.COMMENT, post.getId());
 
+        if (!post.getUser().getUsername().equals(username)) {
+            notificationService.createNotification(post.getUser(), user, NotificationType.COMMENT, post.getId());
+        }
         return CommentResponse.mapToDto(savedComment);
     }
 

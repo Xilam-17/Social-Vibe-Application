@@ -4,7 +4,9 @@ import com.mts.socialvibe_app.user.dto.UserProfileResponse;
 import com.mts.socialvibe_app.user.dto.UserRequest;
 import com.mts.socialvibe_app.user.dto.UserResponse;
 import com.mts.socialvibe_app.user.dto.UserSearchResponse;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface IUserService {
@@ -19,4 +21,6 @@ public interface IUserService {
     List<UserResponse> followersUsers(Long userId);
 
     UserProfileResponse getUserProfile(String targetUsername, String currentUsername);
+
+    UserResponse updateAvatar(String username, MultipartFile file) throws IOException;
 }

@@ -5,6 +5,7 @@ import com.mts.socialvibe_app.common.MessageCode;
 import com.mts.socialvibe_app.common.ResponseWrapper;
 import com.mts.socialvibe_app.features.posts.dto.PostRequest;
 import com.mts.socialvibe_app.features.posts.service.IPostService;
+import com.mts.socialvibe_app.user.service.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,6 +48,16 @@ public class PostController extends BaseController {
         return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS, service.getMyPosts(username));
     }
 
+    @GetMapping("/feed")
+    public ResponseWrapper getFollowingFeed(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS,
+                service.getFollowingFeed(userPrincipal.getId(), userPrincipal.getUsername(), page, size));
+    }
+
     @PutMapping(value = "/edit-post/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseWrapper editPost(
             @PathVariable Long id,
@@ -66,9 +77,4 @@ public class PostController extends BaseController {
         return createResponse(MessageCode.POST_DELETE_SUCCESS, "Post Deleted");
     }
 
-    @GetMapping("/new-feed")
-    public ResponseWrapper getFeed(@AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS, service.getFeed(username));
-    }
 }

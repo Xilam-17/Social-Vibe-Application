@@ -1,14 +1,11 @@
 package com.mts.socialvibe_app.common;
 
-import jdk.jfr.ContentType;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,55 +24,46 @@ public class LocalStorageService {
     public static final List<String> docsTypes = List.of(MediaType.APPLICATION_PDF_VALUE, MediaType.TEXT_PLAIN_VALUE, MediaType.TEXT_MARKDOWN_VALUE,
             MediaType.APPLICATION_OCTET_STREAM_VALUE, "application/msword");
 
-
-
     public String saveFile(MultipartFile file) throws IOException {
-        File directory = new File(uploadPath);
-        if(!directory.exists()) {
-            directory.mkdirs();
-        }
+        String contentType = file.getContentType();
+        log.info("Uploading file type: {}", contentType);
 
-        log.info(file.getContentType());
-        Path path = null;
-        String uri = null;
-        String fileName = UUID.randomUUID()+"_"+file.getOriginalFilename();
-        if (imageTypes.contains(file.getContentType())){
+        String subFolder;
+        String uriPrefix;
 
-             path = Paths.get(uploadPath+"images/",fileName);
-             uri = "images/"+fileName;
-        } else if (docsTypes.contains(file.getContentType())) {
-            path = Paths.get(uploadPath+"docs/", fileName);
-            uri = "docs/"+fileName;
+        if (imageTypes.contains(contentType)) {
+            subFolder = "images/";
+            uriPrefix = "/images/";
+        } else if (docsTypes.contains(contentType)) {
+            subFolder = "docs/";
+            uriPrefix = "/docs/";
         } else {
-            throw new RuntimeException("Unsupported file");
-
-        }
-        //check docs type
-
-
-        if(path != null) {
-            Files.write(path, file.getBytes());
+            throw new RuntimeException("Unsupported file type: " + contentType);
         }
 
+        Path directoryPath = Paths.get(uploadPath).resolve(subFolder);
 
+        if (!Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);
+        }
 
-       /* String fileName = UUID.randomUUID()+"_"+file.getOriginalFilename();
-        Path path = Paths.get(uploadPath, fileName);
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path filePath = directoryPath.resolve(fileName);
 
-        Files.write(path, file.getBytes());*/
+        Files.write(filePath, file.getBytes());
 
-/*
-        return "/images/" + fileName;
-*/
-        return uri;
+        return uriPrefix + fileName;
     }
 
-    public void deleteFile(String file) {
+    public void deleteFile(String fileUrl) {
         try {
-            String cleanName = file.replace("/images/", "");
-            Files.deleteIfExists(Paths.get(uploadPath, cleanName));
+            String relativePath = fileUrl.startsWith("/") ? fileUrl.substring(1) : fileUrl;
+            Path pathToDelete = Paths.get(uploadPath).resolve(relativePath);
+
+            Files.deleteIfExists(pathToDelete);
+
         } catch (IOException ex) {
-            System.err.println("Could not delete local file : " + ex.getMessage());
+            log.error("Could not delete local file: {}", ex.getMessage());
         }
     }
- }
+}

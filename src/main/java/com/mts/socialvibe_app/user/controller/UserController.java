@@ -10,6 +10,9 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -59,5 +62,12 @@ public class UserController extends BaseController {
     public ResponseWrapper followersUsers(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getId();
         return createResponse(MessageCode.USER_FOUND_SUCCESS, service.followersUsers(userId));
+    }
+
+    @PostMapping("/avatar")
+    public ResponseWrapper updateAvatar(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+        return createResponse(MessageCode.UPDATE_AVATAR_SUCCESS, service.updateAvatar(userDetails.getUsername(), file));
     }
 }

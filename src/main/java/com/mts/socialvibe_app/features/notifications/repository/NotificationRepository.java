@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findAllByRecipientIdAndIsReadFalse(Long recipientId);
+    List<Notification> findAllByRecipientUsernameOrderByCreatedAtDesc(String username);
 
-    Long countByRecipientIdAndIsReadFalse(Long recipientId);}
+    Long countByRecipientUsernameAndIsReadFalse(String username);
+
+    List<Notification> findAllByRecipientUsernameAndIsReadFalse(String username);
+}
