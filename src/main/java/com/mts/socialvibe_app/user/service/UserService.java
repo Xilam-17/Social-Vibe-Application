@@ -6,10 +6,12 @@ import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.features.posts.service.PostService;
 import com.mts.socialvibe_app.features.relationship.repository.RelationshipRepository;
 import com.mts.socialvibe_app.filters.jwt.JwtService;
-import com.mts.socialvibe_app.user.dto.UserProfileResponse;
-import com.mts.socialvibe_app.user.dto.UserRequest;
-import com.mts.socialvibe_app.user.dto.UserResponse;
-import com.mts.socialvibe_app.user.dto.UserSearchResponse;
+import com.mts.socialvibe_app.user.dto.request.UserRegisterRequest;
+import com.mts.socialvibe_app.user.dto.response.UserProfileResponse;
+import com.mts.socialvibe_app.user.dto.request.UserRequest;
+import com.mts.socialvibe_app.user.dto.response.UserRegisterResponse;
+import com.mts.socialvibe_app.user.dto.response.UserResponse;
+import com.mts.socialvibe_app.user.dto.response.UserSearchResponse;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -39,7 +41,7 @@ public class UserService implements IUserService {
 
 
     @Override
-    public UserResponse register(UserRequest userRequest) {
+    public UserRegisterResponse register(UserRegisterRequest userRequest) {
         if (userRepository.existsByUsername(userRequest.getUsername())) {
             throw new RuntimeException("Username '" + userRequest.getUsername() + "' is already taken.");
         }
@@ -51,17 +53,22 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
         UserEntity savedUser = userRepository.save(user);
-        return UserResponse.mapToDto(savedUser);
+        return UserRegisterResponse.mapToDto(savedUser);
     }
 
     @Override
     public String verify(UserRequest userRequest) {
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
 
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(userRequest.getUsername());
+            UserEntity user = userRepository.findByUsernameOrEmail(userRequest.getUsername(), userRequest.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            return jwtService.generateToken(user.getUsername());
         }
+
         return "Fail";
     }
 

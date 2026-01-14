@@ -3,7 +3,8 @@ package com.mts.socialvibe_app.user.controller;
 import com.mts.socialvibe_app.common.BaseController;
 import com.mts.socialvibe_app.common.MessageCode;
 import com.mts.socialvibe_app.common.ResponseWrapper;
-import com.mts.socialvibe_app.user.dto.UserRequest;
+import com.mts.socialvibe_app.user.dto.request.UserRegisterRequest;
+import com.mts.socialvibe_app.user.dto.request.UserRequest;
 import com.mts.socialvibe_app.user.service.IUserService;
 import com.mts.socialvibe_app.user.service.UserPrincipal;
 import jakarta.validation.Valid;
@@ -25,7 +26,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/register")
-    public ResponseWrapper register(@Valid @RequestBody UserRequest userRequest) {
+    public ResponseWrapper register(@Valid @RequestBody UserRegisterRequest userRequest) {
         return createResponse(MessageCode.USER_REGISTER_SUCCESS, service.register(userRequest));
     }
 
@@ -33,9 +34,12 @@ public class UserController extends BaseController {
     public ResponseWrapper login(@RequestBody UserRequest userRequest) {
         try {
             String token = service.verify(userRequest);
+            if ("Fail".equals(token)) {
+                return createResponse(MessageCode.UNAUTHORIZED_INVALID_CREDENTIALS, "Authentication failed");
+            }
             return createResponse(MessageCode.USER_LOGIN_SUCCESS, token);
         } catch (Exception e) {
-            return createResponse(MessageCode.UNAUTHORIZED_INVALID_CREDENTIALS, "Invalid username or password");
+            return createResponse(MessageCode.UNAUTHORIZED_INVALID_CREDENTIALS, e.getMessage());
         }
     }
 

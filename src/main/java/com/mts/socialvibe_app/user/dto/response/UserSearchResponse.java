@@ -1,6 +1,5 @@
-package com.mts.socialvibe_app.user.dto;
+package com.mts.socialvibe_app.user.dto.response;
 
-import com.mts.socialvibe_app.user.model.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

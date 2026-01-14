@@ -1,4 +1,4 @@
-package com.mts.socialvibe_app.user.dto;
+package com.mts.socialvibe_app.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,3 +25,4 @@ public class UserRequest {
     private String avatarUrl;
     private String bio;
 }
+

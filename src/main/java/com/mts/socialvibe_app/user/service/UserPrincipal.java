@@ -18,6 +18,10 @@ public class UserPrincipal implements UserDetails {
         this.user = user;
     }
 
+    public static UserPrincipal create(UserEntity user) {
+        return new UserPrincipal(user);
+    }
+
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("USER"));

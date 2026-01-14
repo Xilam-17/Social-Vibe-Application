@@ -5,7 +5,8 @@ import com.mts.socialvibe_app.features.notifications.model.Notification;
 import com.mts.socialvibe_app.features.relationship.model.Relationship;
 import com.mts.socialvibe_app.features.likes.model.Like;
 import com.mts.socialvibe_app.features.posts.model.Post;
-import com.mts.socialvibe_app.user.dto.UserRequest;
+import com.mts.socialvibe_app.user.dto.request.UserRegisterRequest;
+import com.mts.socialvibe_app.user.dto.request.UserRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -69,14 +70,12 @@ public class UserEntity {
     @OneToMany(mappedBy = "actor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> actors;
 
-    public static UserEntity mapToEntity(UserRequest dto) {
+    public static UserEntity mapToEntity(UserRegisterRequest dto) {
         UserEntity user = new UserEntity();
         user.setUsername(dto.getUsername());
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
-        user.setAvatarUrl(dto.getAvatarUrl());
-        user.setBio(dto.getBio());
         return user;
     }
 }

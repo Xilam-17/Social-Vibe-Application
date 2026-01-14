@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
+    Optional<UserEntity> findByUsernameOrEmail(String username, String email);
+
     @Query("select r.following from Relationship r where r.follower.id = :follower_id")
     List<UserEntity> findFollowingUserListByFollowerId(@Param("follower_id") Long followerId);
 
