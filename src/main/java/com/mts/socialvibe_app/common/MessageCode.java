@@ -22,7 +22,10 @@ public enum MessageCode {
     NOTIFICATION_RETRIEVE_SUCCESS("NRS", "Notification retrieved successfully"),
     NOTIFICATION_COUNT_SUCCESS("NCS", "Notification count success"),
     NOTIFICATION_UPDATE_SUCCESS("NUS", "Notification updated successfully"),
-    UPDATE_AVATAR_SUCCESS("UAS", "User Avatar updated successfully");
+    UPDATE_AVATAR_SUCCESS("UAS", "User Avatar updated successfully"),
+    USER_PROFILE_UPDATE_SUCCESS("UPUS", "User profile updated successfully"),
+    FRIEND_REQUEST_CONFIRMED("FRC", "Friend request confirmed successfully"),
+    FRIEND_REQUEST_DECLINED("FRD", "Friend request declined");
     private final String statusCode;
     private final String message;
 

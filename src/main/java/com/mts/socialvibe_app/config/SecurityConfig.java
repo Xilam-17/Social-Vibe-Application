@@ -1,7 +1,6 @@
 package com.mts.socialvibe_app.config;
 
-import com.mts.socialvibe_app.filters.jwt.JwtFilter;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.mts.socialvibe_app.config.jwt.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,7 +38,6 @@ public class SecurityConfig {
                     .authorizeHttpRequests(request ->
                             request.requestMatchers("/api/v1/user/register", "/api/v1/user/login").permitAll()
                                     .anyRequest().authenticated())
-                    .httpBasic(Customizer.withDefaults())
                     .sessionManagement(session ->
                             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

@@ -29,7 +29,7 @@ public class NotificationController extends BaseController {
     }
 
     @PatchMapping("/{notifyId}/read")
-    public ResponseWrapper makeAsRead(@PathVariable Long notifyId) {
+    public ResponseWrapper makeAsRead(@PathVariable("notifyId") Long notifyId) {
         service.makeAsRead(notifyId);
         return createResponse(MessageCode.NOTIFICATION_RETRIEVE_SUCCESS, "Notification marked as read");
     }

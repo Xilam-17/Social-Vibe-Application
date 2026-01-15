@@ -1,4 +1,4 @@
-package com.mts.socialvibe_app.filters.jwt;
+package com.mts.socialvibe_app.config.jwt;
 
 import org.springframework.security.core.userdetails.UserDetails;
 

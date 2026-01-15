@@ -183,6 +183,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<parameters>true</parameters>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>

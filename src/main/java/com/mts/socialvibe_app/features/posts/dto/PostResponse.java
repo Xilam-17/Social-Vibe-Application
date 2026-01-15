@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponse {
+
+
+
     private Long id;
     private String caption;
     private String imageUrl;
@@ -26,11 +29,11 @@ public class PostResponse {
     private Long commentCount;
     private boolean isLikedByCurrentUser;
 
-    public static PostResponse mapToDto(Post post, boolean isLiked, long likeCount, long commentCount) {
+    public static PostResponse mapToDto(Post post, boolean isLiked, long likeCount, long commentCount, String baseUrl) {
         return PostResponse.builder()
                 .id(post.getId())
                 .caption(post.getCaption())
-                .imageUrl(post.getImageUrl())
+                .imageUrl(baseUrl + post.getImageUrl())
                 .location(post.getLocation())
                 .createdAt(post.getCreatedAt())
                 .username(post.getUser() != null ? post.getUser().getUsername() : null)

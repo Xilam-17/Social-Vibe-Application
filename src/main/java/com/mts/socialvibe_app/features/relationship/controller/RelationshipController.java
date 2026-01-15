@@ -21,7 +21,7 @@ public class RelationshipController extends BaseController {
 
     @PostMapping("/{targetUserId}/follow")
     public ResponseWrapper toggleFollow(
-            @PathVariable Long targetUserId,
+            @PathVariable("targetUserId") Long targetUserId,
             @AuthenticationPrincipal UserDetails userDetails
             ) {
         String followerUsername = userDetails.getUsername();

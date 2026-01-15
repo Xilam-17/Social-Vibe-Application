@@ -13,12 +13,12 @@ import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 // --- FIXED IMPORTS ---
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 // ---------------------
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +30,9 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class PostService implements IPostService {
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
@@ -131,6 +134,6 @@ public class PostService implements IPostService {
         long likeCount = likeRepository.countByPostId(post.getId());
         long commentCount = commentRepository.countByPostId(post.getId());
 
-        return PostResponse.mapToDto(post, isLiked, likeCount, commentCount);
+        return PostResponse.mapToDto(post, isLiked, likeCount, commentCount, baseUrl);
     }
 }

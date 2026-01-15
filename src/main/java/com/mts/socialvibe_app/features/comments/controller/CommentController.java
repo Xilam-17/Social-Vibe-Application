@@ -22,7 +22,7 @@ public class CommentController extends BaseController {
 
     @PostMapping("/{postId}/comment")
     public ResponseWrapper createComment(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CommentRequest commentRequest) {
         String username = userDetails.getUsername();
@@ -30,12 +30,12 @@ public class CommentController extends BaseController {
     }
 
     @GetMapping("/{postId}/comments")
-    public ResponseWrapper getAllComments(@PathVariable Long postId) {
+    public ResponseWrapper getAllComments(@PathVariable("postId") Long postId) {
         return  createResponse(MessageCode.COMMENT_RETRIEVE_SUCCESS, service.getAllCommentsByPostId(postId));
     }
 
     @DeleteMapping("/{postId}/comment/{commentId}/delete-comment")
-    public ResponseWrapper deleteComment(@PathVariable Long postId, @PathVariable Long commentId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseWrapper deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         service.deleteComment(postId, commentId, username);
         return createResponse(MessageCode.COMMENT_DELETE_SUCCESS, "Comment Deleted");

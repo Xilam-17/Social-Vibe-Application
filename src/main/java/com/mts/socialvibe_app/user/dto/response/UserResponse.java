@@ -21,6 +21,7 @@ public class UserResponse {
     private Long postCount;
     private Long followerCount;
     private Long followingCount;
+    private Boolean isFollowing;
 
     public static UserResponse mapToDto(UserEntity user) {
         return UserResponse.builder()

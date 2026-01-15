@@ -1,5 +1,7 @@
 package com.mts.socialvibe_app.user.service;
 
+import com.mts.socialvibe_app.user.dto.request.ConfirmFriendRequest;
+import com.mts.socialvibe_app.user.dto.request.EditProfileRequest;
 import com.mts.socialvibe_app.user.dto.request.UserRegisterRequest;
 import com.mts.socialvibe_app.user.dto.response.UserProfileResponse;
 import com.mts.socialvibe_app.user.dto.request.UserRequest;
@@ -20,9 +22,17 @@ public interface IUserService {
 
     List<UserResponse> followingsUsers(Long userId);
 
-    List<UserResponse> followersUsers(Long userId);
+    List<UserResponse> followersUsers(Long userId, String currentUsername);
 
     UserProfileResponse getUserProfile(String targetUsername, String currentUsername);
 
     UserResponse updateAvatar(String username, MultipartFile file) throws IOException;
+
+    UserResponse editProfile(String username, EditProfileRequest editProfileRequest, MultipartFile file) throws IOException;
+
+    List<UserResponse> getFriendsList(Long userId, String currentUsername);
+
+    com.mts.socialvibe_app.features.relationship.dto.RelationshipDto confirmFriendRequest(String currentUsername, ConfirmFriendRequest confirmFriendRequest);
+
+    List<UserResponse> suggestFriends(Long userId, String currentUsername);
 }

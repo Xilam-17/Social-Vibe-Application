@@ -1,4 +1,4 @@
-package com.mts.socialvibe_app.filters.jwt;
+package com.mts.socialvibe_app.config.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +19,9 @@ public class JwtService implements IJwtService{
 
     @Value("${jwt.secret}")
     private String secretKey;
+
+    @Value("${jwt.expiration:604800000}")
+    private long jwtExpiration; // Default: 7 days in milliseconds (7 * 24 * 60 * 60 * 1000)
 
     private Key getKey() {
         byte[] bytesKey = Decoders.BASE64.decode(secretKey);
@@ -51,16 +53,18 @@ public class JwtService implements IJwtService{
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getKey())
                 .compact();
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
+        String cleanToken = token.replaceAll("\\s", "");
+
         return Jwts.parser()
                 .verifyWith((SecretKey) getKey())
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(cleanToken)
                 .getPayload();
     }
 }

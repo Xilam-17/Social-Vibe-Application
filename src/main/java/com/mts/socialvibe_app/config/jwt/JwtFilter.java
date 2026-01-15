@@ -1,14 +1,7 @@
-package com.mts.socialvibe_app.filters.jwt;
+package com.mts.socialvibe_app.config.jwt;
 
-import com.google.gson.Gson;
-import com.mts.socialvibe_app.exceptions.ErrorResponse;
-import com.mts.socialvibe_app.user.service.MyUserDetailsService;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,9 +10,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
+import com.mts.socialvibe_app.exceptions.ErrorResponse;
+import com.mts.socialvibe_app.user.service.MyUserDetailsService;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 @Slf4j
@@ -42,15 +43,24 @@ public class JwtFilter extends OncePerRequestFilter {
         String username = null;
 
         try {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            username = jwtService.extractName(token);
-        }
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7).trim();
+
+                if (token.startsWith("Bearer ")) {
+                    token = token.substring(7).trim();
+                }
+
+                if (!token.isEmpty() && token.contains(".")) {
+                    username = jwtService.extractName(token);
+                } else {
+                    log.error("Invalid token format received: {}", token);
+                }
+            }
         } catch (ExpiredJwtException exception) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON.getType());
             ErrorResponse errorResponse = ErrorResponse.from(HttpStatus.UNAUTHORIZED.value(), "JWT token expired!");
-            var jsonWOM = new ObjectMapper().writeValueAsString(errorResponse);
+            String jsonWOM = new ObjectMapper().writeValueAsString(errorResponse);
             log.info("JSON format with object mapper : {}",jsonWOM);
             response.getWriter().write(jsonWOM);
 

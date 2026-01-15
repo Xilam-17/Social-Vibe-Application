@@ -51,8 +51,8 @@ public class PostController extends BaseController {
     @GetMapping("/feed")
     public ResponseWrapper getFollowingFeed(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
 
         return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS,
                 service.getFollowingFeed(userPrincipal.getId(), userPrincipal.getUsername(), page, size));
@@ -60,7 +60,7 @@ public class PostController extends BaseController {
 
     @PutMapping(value = "/edit-post/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseWrapper editPost(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestPart("postData") PostRequest postRequest,
             @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -70,7 +70,7 @@ public class PostController extends BaseController {
 
     @DeleteMapping("/delete-post/{id}")
     public ResponseWrapper deletePost(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         service.deletePost(id, userDetails.getUsername());

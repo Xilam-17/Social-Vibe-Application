@@ -20,7 +20,7 @@ public class LikeController extends BaseController {
     private final ILikeService service;
 
     @PostMapping("/{postId}/like")
-    public ResponseWrapper toggleLike(@PathVariable Long postId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseWrapper toggleLike(@PathVariable("postId") Long postId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         return createResponse(MessageCode.LIKE_POST_SUCCESS, service.toggleLike(postId, username));
     }
