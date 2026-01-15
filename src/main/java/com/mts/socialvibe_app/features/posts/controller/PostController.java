@@ -77,4 +77,22 @@ public class PostController extends BaseController {
         return createResponse(MessageCode.POST_DELETE_SUCCESS, "Post Deleted");
     }
 
+    @PostMapping("/save-post/{postId}")
+    public ResponseWrapper savePost(
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        String result = service.savePost(username, postId);
+        MessageCode messageCode = result.contains("saved") 
+                ? MessageCode.POST_SAVE_SUCCESS 
+                : MessageCode.POST_UNSAVE_SUCCESS;
+        return createResponse(messageCode, result);
+    }
+
+    @GetMapping("/saved-posts")
+    public ResponseWrapper getSavedPosts(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        return createResponse(MessageCode.POSTS_RETRIEVE_SUCCESS, service.getSavedPosts(username));
+    }
+
 }

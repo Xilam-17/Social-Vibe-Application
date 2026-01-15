@@ -25,7 +25,9 @@ public enum MessageCode {
     UPDATE_AVATAR_SUCCESS("UAS", "User Avatar updated successfully"),
     USER_PROFILE_UPDATE_SUCCESS("UPUS", "User profile updated successfully"),
     FRIEND_REQUEST_CONFIRMED("FRC", "Friend request confirmed successfully"),
-    FRIEND_REQUEST_DECLINED("FRD", "Friend request declined");
+    FRIEND_REQUEST_DECLINED("FRD", "Friend request declined"),
+    POST_SAVE_SUCCESS("PSS", "Post saved successfully"),
+    POST_UNSAVE_SUCCESS("PUSS", "Post unsaved successfully");
     private final String statusCode;
     private final String message;
 

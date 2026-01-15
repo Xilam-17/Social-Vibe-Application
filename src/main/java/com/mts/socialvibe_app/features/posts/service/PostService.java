@@ -4,6 +4,8 @@ import com.mts.socialvibe_app.common.LocalStorageService;
 import com.mts.socialvibe_app.features.comments.repository.CommentRepository;
 import com.mts.socialvibe_app.features.likes.repository.LikeRepository;
 import com.mts.socialvibe_app.features.notifications.model.NotificationType;
+import com.mts.socialvibe_app.features.savedposts.model.SavedPost;
+import com.mts.socialvibe_app.features.savedposts.repository.SavedPostRepository;
 import com.mts.socialvibe_app.features.notifications.service.NotificationService;
 import com.mts.socialvibe_app.features.posts.dto.PostRequest;
 import com.mts.socialvibe_app.features.posts.dto.PostResponse;
@@ -12,19 +14,18 @@ import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.user.model.UserEntity;
 import com.mts.socialvibe_app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-// --- FIXED IMPORTS ---
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-// ---------------------
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -40,6 +41,7 @@ public class PostService implements IPostService {
     private final LikeRepository likeRepository;
     private final NotificationService notificationService;
     private final LocalStorageService localStorageService;
+    private final SavedPostRepository savedPostRepository;
 
     private Post getPost(Long id) {
         return postRepository.findById(id)
@@ -127,6 +129,39 @@ public class PostService implements IPostService {
         Page<Post> postPage = postRepository.findFollowingFeed(userId, pageable);
 
         return postPage.map(post -> mapToPostResponse(post, currentUsername));
+    }
+
+    @Override
+    @Transactional
+    public String savePost(String username, Long postId) {
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) throw new RuntimeException("User not found");
+
+        Post post = getPost(postId);
+
+        Optional<SavedPost> existingSavedPost = savedPostRepository.findByUserUsernameAndPostId(username, postId);
+        
+        if (existingSavedPost.isPresent()) {
+            savedPostRepository.delete(existingSavedPost.get());
+            return "Post unsaved successfully";
+        } else {
+            SavedPost savedPost = new SavedPost();
+            savedPost.setUser(user);
+            savedPost.setPost(post);
+            savedPostRepository.save(savedPost);
+            return "Post saved successfully";
+        }
+    }
+
+    @Override
+    public List<PostResponse> getSavedPosts(String username) {
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) throw new RuntimeException("User not found");
+
+        List<SavedPost> savedPosts = savedPostRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+        return savedPosts.stream()
+                .map(savedPost -> mapToPostResponse(savedPost.getPost(), username))
+                .toList();
     }
 
     public PostResponse mapToPostResponse(Post post, String username) {

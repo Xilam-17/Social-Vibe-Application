@@ -69,6 +69,14 @@ public class UserController extends BaseController {
         return createResponse(MessageCode.USER_FOUND_SUCCESS, service.getUserProfile(targetUsername, currentUsername));
     }
 
+    @GetMapping("/see-profile")
+    public ResponseWrapper seeProfile(
+            @RequestParam(value = "username", required = false) String username,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String currentUsername = userDetails.getUsername();
+        return createResponse(MessageCode.USER_FOUND_SUCCESS, service.seeProfile(username, currentUsername));
+    }
+
     @GetMapping("/followings")
     public ResponseWrapper followingsUsers(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getId();

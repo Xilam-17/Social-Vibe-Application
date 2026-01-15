@@ -2,6 +2,7 @@ package com.mts.socialvibe_app.user.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,15 +13,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.mts.socialvibe_app.common.LocalStorageService;
 import com.mts.socialvibe_app.config.jwt.JwtService;
+import com.mts.socialvibe_app.features.notifications.service.NotificationService;
 import com.mts.socialvibe_app.features.posts.dto.PostResponse;
 import com.mts.socialvibe_app.features.posts.repository.PostRepository;
 import com.mts.socialvibe_app.features.posts.service.PostService;
-import com.mts.socialvibe_app.features.notifications.model.NotificationType;
-import com.mts.socialvibe_app.features.notifications.service.NotificationService;
 import com.mts.socialvibe_app.features.relationship.dto.RelationshipDto;
 import com.mts.socialvibe_app.features.relationship.model.Relationship;
 import com.mts.socialvibe_app.features.relationship.repository.RelationshipRepository;
-import java.util.Optional;
+import com.mts.socialvibe_app.features.savedposts.model.SavedPost;
+import com.mts.socialvibe_app.features.savedposts.repository.SavedPostRepository;
 import com.mts.socialvibe_app.user.dto.request.ConfirmFriendRequest;
 import com.mts.socialvibe_app.user.dto.request.EditProfileRequest;
 import com.mts.socialvibe_app.user.dto.request.UserRegisterRequest;
@@ -48,6 +49,7 @@ public class UserService implements IUserService {
     private final PostRepository postRepository;
     private final LocalStorageService localStorageService;
     private final NotificationService notificationService;
+    private final SavedPostRepository savedPostRepository;
 
 
     @Override
@@ -126,9 +128,16 @@ public class UserService implements IUserService {
         Long followings = relationshipRepository.countFollowingByFollowerId(targetUser.getId());
 
         Long postCount = postRepository.countByUserId(targetUser.getId());
+        Long savedPostCount = savedPostRepository.countByUserId(targetUser.getId());
 
         boolean isFollowing = relationshipRepository.findByFollowerUsernameAndFollowingId(currentUsername, targetUser.getId()).isPresent();
         List<PostResponse> userPosts = postService.getPostsByUsername(targetUsername, currentUsername);
+        
+        // Get saved posts for the target user
+        List<SavedPost> savedPosts = savedPostRepository.findByUserIdOrderByCreatedAtDesc(targetUser.getId());
+        List<PostResponse> savedPostResponses = savedPosts.stream()
+                .map(savedPost -> postService.mapToPostResponse(savedPost.getPost(), currentUsername))
+                .toList();
 
         return UserProfileResponse.builder()
                 .id(targetUser.getId())
@@ -138,11 +147,20 @@ public class UserService implements IUserService {
                 .avatarUrl(targetUser.getAvatarUrl())
                 .bio(targetUser.getBio())
                 .postCount(postCount)
+                .savedPostCount(savedPostCount)
                 .followerCount(followers)
                 .followingCount(followings)
                 .isFollowing(isFollowing)
                 .posts(userPosts)
+                .savedPosts(savedPostResponses)
                 .build();
+    }
+
+    @Override
+    public UserProfileResponse seeProfile(String username, String currentUsername) {
+        // If username is not provided or is empty, use current user's username (own profile)
+        String targetUsername = (username != null && !username.trim().isEmpty()) ? username.trim() : currentUsername;
+        return getUserProfile(targetUsername, currentUsername);
     }
 
     @Transactional

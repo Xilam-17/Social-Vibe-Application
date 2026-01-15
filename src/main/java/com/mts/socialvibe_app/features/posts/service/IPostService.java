@@ -22,4 +22,9 @@ public interface IPostService {
 
     List<PostResponse> getPostsByUsername(String targetUsername, String currentUsername);
 
-    Page<PostResponse> getFollowingFeed(Long id, String username, int page, int size);}
+    Page<PostResponse> getFollowingFeed(Long id, String username, int page, int size);
+
+    String savePost(String username, Long postId);
+
+    List<PostResponse> getSavedPosts(String username);
+}

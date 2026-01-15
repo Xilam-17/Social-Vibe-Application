@@ -26,6 +26,8 @@ public interface IUserService {
 
     UserProfileResponse getUserProfile(String targetUsername, String currentUsername);
 
+    UserProfileResponse seeProfile(String username, String currentUsername);
+
     UserResponse updateAvatar(String username, MultipartFile file) throws IOException;
 
     UserResponse editProfile(String username, EditProfileRequest editProfileRequest, MultipartFile file) throws IOException;

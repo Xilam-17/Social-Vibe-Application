@@ -1,11 +1,12 @@
 package com.mts.socialvibe_app.user.dto.response;
 
+import java.util.List;
+
 import com.mts.socialvibe_app.features.posts.dto.PostResponse;
 import com.mts.socialvibe_app.user.model.UserEntity;
+
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -18,11 +19,13 @@ public class UserProfileResponse {
     private String bio;
 
     private Long postCount;
+    private Long savedPostCount;
     private Long followerCount;
     private Long followingCount;
 
     private boolean isFollowing;
     private List<PostResponse> posts;
+    private List<PostResponse> savedPosts;
 
     public static UserProfileResponse mapToUserProfileResponse(UserEntity user) {
         return UserProfileResponse.builder()
