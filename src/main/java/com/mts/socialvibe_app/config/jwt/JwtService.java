@@ -21,7 +21,7 @@ public class JwtService implements IJwtService{
     private String secretKey;
 
     @Value("${jwt.expiration:604800000}")
-    private long jwtExpiration; // Default: 7 days in milliseconds (7 * 24 * 60 * 60 * 1000)
+    private long jwtExpiration;
 
     private Key getKey() {
         byte[] bytesKey = Decoders.BASE64.decode(secretKey);

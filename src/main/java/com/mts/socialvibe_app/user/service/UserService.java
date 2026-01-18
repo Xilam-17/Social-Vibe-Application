@@ -75,12 +75,11 @@ public class UserService implements IUserService {
                 new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
 
         if (authentication.isAuthenticated()) {
-            UserEntity user = userRepository.findByUsernameOrEmail(userRequest.getUsername(), userRequest.getUsername())
+            UserEntity user = userRepository.findByUsernameOrEmail(userRequest.getUsername(), userRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             return jwtService.generateToken(user.getUsername());
         }
-
         return "Fail";
     }
 
@@ -242,7 +241,6 @@ public class UserService implements IUserService {
             throw new RuntimeException("You cannot confirm a friend request with yourself!");
         }
 
-        // Check if target user is following the current user
         boolean targetIsFollowingMe = relationshipRepository.isFollowingBack(
                 currentUser.getId(), 
                 confirmFriendRequest.getTargetUserId()
@@ -252,7 +250,6 @@ public class UserService implements IUserService {
             throw new RuntimeException("This user is not following you. Cannot confirm friend request.");
         }
 
-        // Check if current user already follows target user
         Optional<Relationship> existingFollow = relationshipRepository.findByFollowerUsernameAndFollowingId(
                 currentUsername, 
                 confirmFriendRequest.getTargetUserId()
@@ -263,14 +260,11 @@ public class UserService implements IUserService {
         String message;
         
         if (confirmFriendRequest.getConfirm()) {
-            // User wants to follow back (confirm)
             if (existingFollow.isPresent()) {
-                // Already following, so they're already friends
                 isFollowing = true;
                 isFriend = true;
                 message = "You are already friends with " + targetUser.getUsername();
             } else {
-                // Create the follow relationship (follow back)
                 Relationship relationship = new Relationship();
                 relationship.setFollower(currentUser);
                 relationship.setFollowing(targetUser);

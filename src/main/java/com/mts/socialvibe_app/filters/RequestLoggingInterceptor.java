@@ -50,7 +50,6 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
-        // This method is called after the handler is executed but before the view is rendered
     }
 
     @Override

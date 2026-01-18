@@ -27,14 +27,4 @@ public class UserProfileResponse {
     private List<PostResponse> posts;
     private List<PostResponse> savedPosts;
 
-    public static UserProfileResponse mapToUserProfileResponse(UserEntity user) {
-        return UserProfileResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .avatarUrl(user.getAvatarUrl())
-                .bio(user.getBio())
-                .build();
-    }
 }

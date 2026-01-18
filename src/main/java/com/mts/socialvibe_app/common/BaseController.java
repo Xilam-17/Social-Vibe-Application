@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/v1")
 public class BaseController {
-
     protected ResponseWrapper createResponse(MessageCode messageCode,Object data){
         return ResponseWrapper.from(messageCode.getStatusCode(),messageCode.getMessage(),data,LocalDateTime.now());
     }

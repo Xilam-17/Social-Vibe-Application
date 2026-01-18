@@ -9,5 +9,5 @@ public class ConfirmFriendRequest {
     private Long targetUserId;
 
     @NotNull(message = "Confirm status is required")
-    private Boolean confirm; // true to follow back, false to decline
+    private Boolean confirm;
 }

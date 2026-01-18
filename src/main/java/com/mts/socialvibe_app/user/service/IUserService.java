@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IUserService {
+
     UserRegisterResponse register(UserRegisterRequest userRequest);
 
     String verify(UserRequest userRequest);

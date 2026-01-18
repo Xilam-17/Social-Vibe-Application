@@ -50,7 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     token = token.substring(7).trim();
                 }
 
-                if (!token.isEmpty() && token.contains(".")) {
+                if (token.contains(".")) {
                     username = jwtService.extractName(token);
                 } else {
                     log.error("Invalid token format received: {}", token);
